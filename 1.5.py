@@ -1,85 +1,74 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import matplotlib.pyplot as plt
+import numpy as np
 
 
-# ===================== 1. 构建人工数据集 =====================
-# 假设真实的关系是 y = 3x + 2，并加入一些随机噪声
+# ================ 创建 ================
+# 手动创建
+tensor_manual = torch.tensor([[1, 2], [3, 4]])
+print("手动创建tensor:\n", tensor_manual)
 
-# 生成从0到10的100个点
-X = torch.linspace(0, 10, 100)
-# X.shape = (100)
-
-X = X.unsqueeze(1)
-# X.shape = (100, 1)
-
-# 生成 y，加入随机噪声
-y = 3 * X + 2 + torch.randn(100, 1)
-# y.shape = (100, 1)
-
-# 画出示例数据
-plt.scatter(X.numpy(), y.numpy())
-plt.show()
+# 全零、全一和随机tensor
+tensor_zeros = torch.zeros((2, 3))
+tensor_ones = torch.ones((2, 3))
+tensor_rand = torch.rand((2, 3))
+print("全零tensor:\n", tensor_zeros)
+print("全一tensor:\n", tensor_ones)
+print("随机tensor:\n", tensor_rand)
 
 
-# ===================== 2. 定义线性回归模型 =====================
-class LinearRegressionModel(nn.Module):
-    def __init__(self):
-        super(LinearRegressionModel, self).__init__()
-        
-        # y = wx + b，输出输出都是 1 维
-        self.linear = nn.Linear(1, 1)
+# ================ 基础属性 ================
+tensor = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float32)
 
-    def forward(self, x):
-        return self.linear(x)
-
-# 实例化模型
-model = LinearRegressionModel()
+print("形状:", tensor.shape)
+print("数据类型:", tensor.dtype)
+print("设备:", tensor.device)
 
 
-# ===================== 3. 定义损失函数和优化器 =====================
-# 均方误差作为损失函数
-criterion = nn.MSELoss()
+# ================ 运算 ================
+# 基本加法运算
+tensor1 = torch.tensor([1.0, 2.0, 3.0])
+tensor2 = torch.tensor([4.0, 5.0, 6.0])
+print("加法:", tensor1 + tensor2)
 
-# 随机梯度下降 (SGD) 作为优化器
-optimizer = optim.SGD(model.parameters(), lr=0.01)  # 学习率 0.01
+# 广播机制
+tensor3 = torch.tensor([[1, 2], [3, 4]])
+tensor_broadcast = tensor3 + torch.tensor([1, 2])
+print("广播加法:\n", tensor_broadcast)
 
-
-# ===================== 4. 训练模型 =====================
-epochs = 1000  # 训练1000个回合
-for epoch in range(epochs):
-    # 使用模型预测输出
-    predictions = model(X)
-    
-    # 计算损失
-    loss = criterion(predictions, y)
-    
-    # 梯度清零，防止累积
-    optimizer.zero_grad()
-    
-    # 计算梯度
-    loss.backward()
-    
-    # 更新参数
-    optimizer.step()
-
-    # 打印训练过程中的损失值
-    if (epoch + 1) % 100 == 0:
-        print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+# 将tensor移动到GPU
+if torch.cuda.is_available():
+    tensor_gpu = tensor1.to("cuda")
+    print("在GPU上的tensor:", tensor_gpu)
 
 
-# ===================== 5. 可视化结果 =====================
-# 使用训练好的模型预测
-predicted = model(X)
+# ================ 改变形状 ================
+tensor = torch.tensor([[1, 2, 3], [4, 5, 6]])
 
-# 原始数据
-plt.scatter(X.numpy(), y.numpy(), label='Original Data')
+# 重塑
+reshaped_tensor = tensor.reshape(3, 2)
+print("重塑后的tensor:\n", reshaped_tensor)
 
-# 预测数据
-plt.plot(X.numpy(), predicted.numpy(), color='red', label='Fitted Line')
+# 转置
+transposed_tensor = tensor.transpose(0, 1)
+print("转置后的tensor:\n", transposed_tensor)
 
-plt.xlabel('X')
-plt.ylabel('y')
-plt.legend()
-plt.show()
+
+# ================ 自动微分 ================
+# 创建需要梯度的tensor
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+y = x * x  # 操作
+y_sum = y.sum()  # 求和
+y_sum.backward()  # 计算梯度，只能对标量调用backward()
+print("x的梯度:", x.grad)  # 输出 tensor([4., 6.])
+
+
+# ================ 与 ndarray 的转换 ================
+# 从ndarray转换为tensor
+numpy_array = np.array([1, 2, 3])
+tensor_from_numpy = torch.from_numpy(numpy_array)
+print("从ndarray转换为tensor:", tensor_from_numpy)
+
+# 从tensor转换为ndarray
+tensor = torch.tensor([4.0, 5.0, 6.0])
+numpy_from_tensor = tensor.numpy()
+print("从tensor转换为ndarray:", numpy_from_tensor)
