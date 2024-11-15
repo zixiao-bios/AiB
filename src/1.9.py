@@ -60,7 +60,7 @@ optimizer = optim.SGD(model.parameters(), lr=0.01)  # 学习率 0.01
 
 
 # ===================== 4. 训练模型 =====================
-epochs = 0  # 训练1000个回合
+epochs = 1000  # 训练回合数
 for epoch in range(epochs):
     # 使用模型预测输出
     predictions = model(X)
